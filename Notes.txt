@@ -1,1 +1,2 @@
-As we discuss with Jake https://12factor.net/backing-services
+development application often required accessing multiple databases, also it comply with https://12factor.net/backing-services.
+Our day applications are required to handle backing DBs as distinct resources. Such resource can be attached and detached or replaced if necessary.
