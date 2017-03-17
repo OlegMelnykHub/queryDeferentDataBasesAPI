@@ -1,0 +1,131 @@
+As we discuss with Jake development application often required accessing multiple databases, also it comply with https://12factor.net/backing-services.
+Our day applications are required to handle backing DBs as distinct resources. Such resource can be attached and detached or replaced if necessary.
+
+1.Lets assume that we have 2 DBs available: MySQL and PostgreSQL.
+
+CREATE TABLE candidate (
+    id int(11) NOT NULL,
+    name varchar(128) DEFAULT NULL,
+    email varchar(32) DEFAULT NULL,
+    phone varchar(24) DEFAULT NULL,
+   PRIMARY KEY (`id`)
+)
+and
+
+CREATE TABLE candidate (
+   id integer,
+   name character varying,
+   email character varying,
+   phone character varying(18)
+)
+
+2. Setting up project:
+
+Using https://spring.io/tools Spring tool created repo with Spring dependencies.
+In pom file we should have spring-boot-starter-web and drivers for our DBs.
+QueryDifferentDataBasesConfig.java includes jdbc templates.
+
+3. QueryDifferentDataBasesController based on qualifier select jdbc template of particular DB.
+   From controller jdbcTemplate can be moved out of controller and replaced by service that
+   return template based on qualifier.
+   TODO statements indicate father code improvement.
+
+4. From same application we can serve requests to different DB from same host:
+http://localhost:8080/getCandidatesFromMySql
+http://localhost:8080/getCandidatesFromPostgreSQL
+
+
+
+
+
+
+
+
+
+This application does not expose any end-points other than the default manage end-points, like, /health, /info, /api-docs, etc.
+
+
+Application can be run in multiple ways:
+========================================
+
+1 --> 
+	cd service
+	mvn spring-boot:run
+			This would start the application on localhost:8080
+2 --> 
+	mvn clean package
+	java -jar service/target/datastores.war
+			This would start the application on localhost:8080
+3 -->
+	mvn clean package
+
+	Start local tomcat (7.0.57+)
+	Deploy the war 
+
+			This would start the application on localhost:8080/QueryDifferentDataBases
+4 --> 
+	From your IDE, go to src/main/.../Application.java and run it as java application.
+
+
+
+
+
+To run the acceptance test:
+============================
+
+cd service-acceptance
+
+
+Run acceptance test when running service in "local" from spring boot:
+
+	mvn clean test -DargLine="-Dtest.env=local"
+
+Run acceptance test in "dit-ord" server
+
+	mvn clean test -DargLine="-Dnewpackageid=QueryDifferentDataBases -Dtest.env=dit-ord"
+
+Please note that this command will test the inactive version of the application
+
+**As of now, we don't have capability to test local tomcat application
+
+
+Few of the URLs available by default:
+======================================
+
+/rest/v1/echo/{msg} —> Secured
+	     —> local user/pwd=admin/admin , server user/pwd={env}-remote/{env}-remsleep
+             —> returns {msg}
+
+/health  —> Unsecured
+		 —>  Should return "UP"
+
+
+/info  —>  Unsecured
+	       -> Should return the app name, version and description.
+
+/api-docs -> Unsecured
+		  -> The swagger API documentation URL.
+		  -> The swagger documentation can be found @ /api-docs
+		  -> Use the details given in apis section of the swagger documentation
+
+/doc -> The swagger UI generated using "/api-doc" end-point
+
+/ -> Actuator info end-point
+  -> Secured
+
+service.info.json ( src/main/resources of the generated project) 
+======================================
+You can edit file and also add aliases for services using following format
+"alias": {"alias": "redirect"}
+For example,
+{
+    "context": "offers-service-main",
+    "health_check": {
+        "uri": "/health",
+        "value": "UP"
+    },
+    "coe": "core",
+    "alias": {"offer": "offers-service-main"}
+}
+
+======================================

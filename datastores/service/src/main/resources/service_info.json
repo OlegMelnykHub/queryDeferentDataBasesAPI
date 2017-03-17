@@ -1,0 +1,8 @@
+{
+	"context" :"datastores",
+	"health_check": {
+		"uri": "/health",
+		"value": "UP"
+	},
+	"coe" : "core"
+}
